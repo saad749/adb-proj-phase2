@@ -7,11 +7,11 @@
 * Git
 
 ## Setup:
-1) Install netbeans and glassfish
-2) Clone this repo to your local machine
-3) Create the database using db script [AuctionWeb/DBScripts/AuctionDB.sql]
-4) Open web project "AuctionWeb" in netbeans
-5) Click Run
+* Install netbeans and glassfish
+* Clone this repo to your local machine
+* Create the database using db script [AuctionWeb/DBScripts/AuctionDB.sql]
+* Open web project "AuctionWeb" in netbeans
+* Click Run
 
 ## The Architecture of the application:
 
