@@ -8,6 +8,7 @@ package edu.qu.auction.ws;
 import edu.qu.auction.dao.BidsDao;
 import edu.qu.auction.dao.ItemsDao;
 import edu.qu.auction.dao.UsersDao;
+import edu.qu.auction.dao.redis.RedisDao;
 import edu.qu.auction.domain.Bids;
 import edu.qu.auction.domain.Items;
 import edu.qu.auction.domain.Users;
@@ -32,6 +33,9 @@ public class AuctionWS {
     UsersDao usersDao;
     @EJB
     BidsDao bidsDao;
+    
+    @EJB
+    RedisDao redisDao;
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -43,7 +47,7 @@ public class AuctionWS {
 
     @GET
     @Path("/items")
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_JSON)
     public List<Items> getITems() {
         return itemsFacade.findAll();
     }
@@ -66,16 +70,13 @@ public class AuctionWS {
     public Response postBid( 
             @FormParam("userName") String userName,
             @FormParam("itemId") String itemId,
-            @FormParam("value") String value
-            
+            @FormParam("value") String value            
         ){
         
         Users user =  usersDao.findByUserName(userName);
         Items item = itemsFacade.find(new Integer(itemId));
         
         Bids bid = new Bids();
-        
-//        bid.setId(new Integer(id));
         bid.setItemId(item);
         bid.setUserId(user);
         bid.setBidValue(new Double(value));
@@ -83,6 +84,22 @@ public class AuctionWS {
         bidsDao.bid(bid);
         
         System.out.println("------->post" + userName);
+        return Response.ok().build();
+    }
+    
+    @POST
+    @Path("/bidRedis")
+    public Response postBidRedis( 
+            @FormParam("userName") String userName,
+            @FormParam("itemCode") String itemCode,
+            @FormParam("value") String value            
+        ){
+        
+        
+        redisDao.bid(userName, itemCode, new Double(value));
+        
+        
+        System.out.println("------->post redis" + userName);
         return Response.ok().build();
     }
 }
