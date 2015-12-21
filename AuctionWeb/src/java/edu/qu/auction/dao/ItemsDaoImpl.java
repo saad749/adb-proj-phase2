@@ -7,7 +7,8 @@ package edu.qu.auction.dao;
 
 import javax.ejb.Stateless;
 import edu.qu.auction.domain.Items;
-import javax.ejb.LocalBean;
+import java.util.List;
+import javax.persistence.Query;
 
 /**
  *
@@ -21,4 +22,13 @@ public class ItemsDaoImpl extends BaseDaoImpl<Items> implements ItemsDao{
     public ItemsDaoImpl() {
         super(Items.class);
     } 
+    
+    public List<Items> getItemsByCode(String itemCode){
+        Query query = getEntityManager().createNamedQuery("Items.findByItemCode");
+        query.setParameter("itemCode", itemCode);
+        List<Items> list = query.getResultList();       
+       return list;
+       
+    } 
+    
 }

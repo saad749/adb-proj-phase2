@@ -5,11 +5,8 @@
  */
 package edu.qu.auction.dao.redis;
 
-import edu.qu.auction.domain.Items;
 import java.io.StringWriter;
-import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.ejb.Stateless;
@@ -36,23 +33,36 @@ public class RedisDaoImpl implements RedisDao {
     }
 
     @Override
-    public void bid(String userName, String itemCode, double bidValue) {
+    public void bid(String userName, String itemCode, String bidValue) {
         Jedis jedis = getJedisConnection();
+        
+        //Insert Bid
+        //sadd BidsList
+        Long BidId = jedis.incr("BidsSeq");
+        JsonObjectBuilder itemBuilder = Json.createObjectBuilder()
+                .add("id", BidId)
+                .add("UserId", userName)
+                .add("ItemId", itemCode)
+                .add("BidValue", bidValue + "");
+        JsonObject obj = itemBuilder.build();
+
+        jedis.sadd("BidsList", obj.toString());
 
         //Insert bid
         //HSET key field value
-        String key = "itembid:" + itemCode;
-        jedis.hset(key, userName, bidValue + "");
+        String key = "CurrentItemBid";
+        jedis.hset(key, itemCode, BidId + "");
 
         // Leaderboard Items
         //ZINCRBY key increment member
-        String itemLeaderBoardKey = "ldbItems";
+        String itemLeaderBoardKey = "LBoradItems";
         jedis.zincrby(itemLeaderBoardKey, 1, itemCode);
 
         // Leaderboard User
         //ZINCRBY key increment member
-        String userLeaderBoardKey = "ldbUser";
+        String userLeaderBoardKey = "LBoardUsers";
         jedis.zincrby(userLeaderBoardKey, 1, userName);
+
     }
 
     public void insertItem(String itemCode, String itenDesc, String price) {
@@ -90,6 +100,14 @@ public class RedisDaoImpl implements RedisDao {
             jedis.del(key);
         }
         jedis.set("ItemsSeq", "0");
+    }
+
+    public void deleteAllKeys() {
+        Jedis jedis = getJedisConnection();
+        Set<String> set = jedis.keys("**");
+        for (String key : set) {
+            jedis.del(key);
+        }
     }
 
     public String getAllItemsHash() {
@@ -148,9 +166,7 @@ public class RedisDaoImpl implements RedisDao {
             for (String str : results.getResult()) {
                 builder.append(str).append(",");
             }
-
         }
-
         return "[" + builder.toString() + "]";
 
     }

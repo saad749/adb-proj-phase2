@@ -36,7 +36,7 @@ public class AuctionWS {
     UsersDao usersDao;
     @EJB
     BidsDao bidsDao;
-    
+
     @EJB
     RedisDao redisDao;
 
@@ -53,9 +53,9 @@ public class AuctionWS {
     @Produces(MediaType.APPLICATION_JSON)
     public List<Items> getITems() {
         long a = System.currentTimeMillis();
-        List<Items> items =  itemsFacade.findAll();
+        List<Items> items = itemsFacade.findAll();
         long b = System.currentTimeMillis();
-        System.out.println("Time taken to retrieve all items in MySQL:" + (b-a));
+        System.out.println("Time taken to retrieve all items in MySQL:" + (b - a));
         return items;
     }
 
@@ -72,106 +72,150 @@ public class AuctionWS {
     public List<Bids> getBids() {
         return bidsDao.findAll();
     }
-    
+
     @POST
-    public Response postBid( 
+    public Response postBid(
             @FormParam("userName") String userName,
             @FormParam("itemId") String itemId,
-            @FormParam("value") String value            
-        ){
-        
-        Users user =  usersDao.findByUserName(userName);
+            @FormParam("value") String value
+    ) {
+
+        Users user = usersDao.findByUserName(userName);
         Items item = itemsFacade.find(new Integer(itemId));
-        
+
         Bids bid = new Bids();
         bid.setItemId(item);
         bid.setUserId(user);
         bid.setBidValue(new Double(value));
-        
+
         bidsDao.bid(bid);
-        
+
         System.out.println("------->post" + userName);
         return Response.ok().build();
     }
     
+    @GET
+    @Path("/simulateBids")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String simulateBids() {
+        int num = 1000;
+        long a = System.currentTimeMillis();
+        Random rand = new Random();
+        for (int x = 1; x <= num; x++) {
+
+            String userName = "userName" + (rand.nextInt(10) + 1);
+            String itemCode = "itemCode" + (rand.nextInt(10) + 1);
+            String bidValue = "bidValue" + (rand.nextInt(1000) + 1);
+
+            redisDao.bid(userName, itemCode, bidValue);
+        }
+
+        long b = System.currentTimeMillis();
+
+        return "Time taken to inseted " + num + " items in Redis:" + (b - a);
+
+    }
+
     @POST
     @Path("/bidRedis")
-    public Response postBidRedis( 
+    public Response postBidRedis(
             @FormParam("userName") String userName,
             @FormParam("itemCode") String itemCode,
-            @FormParam("value") String value            
-        ){
-        
-        redisDao.bid(userName, itemCode, new Double(value));
-        
-        
+            @FormParam("value") String value
+    ) {
+
+        redisDao.bid(userName, itemCode, value);
+
         System.out.println("------->post redis" + userName);
         return Response.ok().build();
     }
-    
+
     @GET
     @Path("/createItemsRedis")
     @Produces(MediaType.TEXT_PLAIN)
-    public String  createItems(){
+    public String createItems() {
         int num = 1000;
         redisDao.clearItems();
         long a = System.currentTimeMillis();
         Random rand = new Random();
-        for(int x = 1; x <= num; x++){
-            String code = "itemCode"+x;
-            String desc = "desc"+x;
-            String price = ""+ (rand.nextInt(1000) + 1);
-            
+        for (int x = 1; x <= num; x++) {
+            String code = "itemCode" + x;
+            String desc = "desc" + x;
+            String price = "" + (rand.nextInt(1000) + 1);
+
 //            redisDao.insertItem(code, desc, price);
             redisDao.insertItemsAsList(code, desc, price);
         }
         long b = System.currentTimeMillis();
-        
-        return "Time taken to inseted " +num+ " items in Redis:" + (b-a);      
-        
+
+        return "Time taken to inseted " + num + " items in Redis:" + (b - a);
+
     }
+
     @GET
     @Path("/createItemsMySQL")
     @Produces(MediaType.TEXT_PLAIN)
-    public String createItemsMySQL(){
-        
-      int num = 1000;
-      long a = System.currentTimeMillis();
+    public String createItemsMySQL() {
+
+        int num = 1000;
+        long a = System.currentTimeMillis();
         Random rand = new Random();
-        for(int x = 1; x <= num; x++){
+        for (int x = 1; x <= num; x++) {
             Items item = new Items();
-            String code = "itemCode"+x;
-            String desc = "desc"+x;
-            String price = ""+ (rand.nextInt(1000) + 1);
-            
+            String code = "itemCode" + x;
+            String desc = "desc" + x;
+            String price = "" + (rand.nextInt(1000) + 1);
+
             item.setItemCode(code);
             item.setPrice(price);
             item.setShortDesc(desc);
             itemsFacade.create(item);
         }
         long b = System.currentTimeMillis();
-        return "Time taken to inseted " +num+ " items in MySQL:" + (b-a); 
+        return "Time taken to inseted " + num + " items in MySQL:" + (b - a);
     }
-    
+
     @GET
     @Path("/getAllItemsRedis")
     @Produces(MediaType.APPLICATION_JSON)
-    public  String getAllItemRedis(){        
-       long a = System.currentTimeMillis();
+    public String getAllItemRedis() {
+        long a = System.currentTimeMillis();
 //        String itemsJson =  redisDao.getAllItemsHash();
-       String itemsJson =  redisDao.getAllItemsAsList();
+        String itemsJson = redisDao.getAllItemsAsList();
         long b = System.currentTimeMillis();
-        System.out.println("Time taken to retrieve all items from Redis:" + (b-a));
+        System.out.println("Time taken to retrieve all items from Redis:" + (b - a));
         return itemsJson;
     }
-    
-    @GET
+
+    @POST
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
-    public  String searchItems(){    
-        
-         String itemsJson =  redisDao.searchItems("*itemCode1*");
-         return itemsJson;
+    public String searchItemsRedis(@FormParam("pattern") String pattern) {
+        Long a = System.currentTimeMillis();
+        String itemsJson = redisDao.searchItems(pattern);
+        Long b = System.currentTimeMillis();
+        System.out.println("Time taken to Search in Redis:" + (b - a));
+        return itemsJson;
     }
-    
+
+    @POST
+    @Path("/searchMySQL")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Items> searchItemsMySQL(@FormParam("itemCode") String itemCode) {
+        Long a = System.currentTimeMillis();
+        List<Items> items = itemsFacade.getItemsByCode(itemCode);
+        Long b = System.currentTimeMillis();
+        System.out.println("Time taken to Search in MySQL:" + (b - a));
+        return items;
+
+    }
+
+    @GET
+    @Path("/clearRedis")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String deleteAllRedisKeys() {
+        redisDao.deleteAllKeys();
+        return "Done";
+    }
+
 }

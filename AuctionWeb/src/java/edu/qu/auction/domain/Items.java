@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Items.findAll", query = "SELECT i FROM Items i"),
     @NamedQuery(name = "Items.findById", query = "SELECT i FROM Items i WHERE i.id = :id"),
-    @NamedQuery(name = "Items.findByItemCode", query = "SELECT i FROM Items i WHERE i.itemCode = :itemCode"),
+    @NamedQuery(name = "Items.findByItemCode", query = "SELECT i FROM Items i WHERE i.itemCode like :itemCode"),
     @NamedQuery(name = "Items.findByShortDesc", query = "SELECT i FROM Items i WHERE i.shortDesc = :shortDesc"),
     @NamedQuery(name = "Items.findByPrice", query = "SELECT i FROM Items i WHERE i.price = :price")})
 public class Items implements Serializable {

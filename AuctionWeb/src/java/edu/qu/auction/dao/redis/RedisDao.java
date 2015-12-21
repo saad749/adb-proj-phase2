@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public interface RedisDao {
 
-    void bid(String userName, String itemCode, double bidValue);
+    void bid(String userName, String itemCode, String bidValue);
 
     void insertItem(String itemCode, String itenDesc, String price);
 
@@ -25,5 +25,6 @@ public interface RedisDao {
      String getAllItemsAsList();
      void insertItemsAsList(String itemCode, String itenDesc, String price);
      String searchItems(String match);
+     void deleteAllKeys();
 
 }
