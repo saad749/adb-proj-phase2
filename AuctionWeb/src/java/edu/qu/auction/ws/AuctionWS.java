@@ -93,11 +93,11 @@ public class AuctionWS {
         System.out.println("------->post" + userName);
         return Response.ok().build();
     }
-    
+
     @GET
-    @Path("/simulateBids")
+    @Path("/simulateBidsRedis")
     @Produces(MediaType.TEXT_PLAIN)
-    public String simulateBids() {
+    public String simulateBidsRedis() {
         int num = 1000;
         long a = System.currentTimeMillis();
         Random rand = new Random();
@@ -105,15 +105,40 @@ public class AuctionWS {
 
             String userName = "userName" + (rand.nextInt(10) + 1);
             String itemCode = "itemCode" + (rand.nextInt(10) + 1);
-            String bidValue = "bidValue" + (rand.nextInt(1000) + 1);
+            String bidValue = "" + (rand.nextInt(1000) + 1);
 
             redisDao.bid(userName, itemCode, bidValue);
         }
-
         long b = System.currentTimeMillis();
-
         return "Time taken to inseted " + num + " items in Redis:" + (b - a);
+    }
 
+    @GET
+    @Path("/simulateBidsMySQL")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String simulateBidsMySQL() {
+        int num = 1000;
+        long a = System.currentTimeMillis();
+        Random rand = new Random();
+        for (int x = 1; x <= num; x++) {
+
+            String userName = "userName" + (rand.nextInt(10) + 1);
+            String itemCode = "itemCode" + (rand.nextInt(10) + 1);
+            String bidValue = "" +  (rand.nextInt(1000) + 1);
+
+            Users user = usersDao.findByUserName(userName);
+            List<Items> items = itemsFacade.getItemsByCode(itemCode);
+            Items item = items.get(0);
+            
+            Bids bid = new Bids();
+            bid.setItemId(item);
+            bid.setUserId(user);
+            bid.setBidValue(new Double(bidValue));
+
+            bidsDao.bid(bid);
+        }
+        long b = System.currentTimeMillis();
+        return "Time taken to inseted " + num + " items in Redis:" + (b - a);
     }
 
     @POST
@@ -133,9 +158,8 @@ public class AuctionWS {
     @GET
     @Path("/createItemsRedis")
     @Produces(MediaType.TEXT_PLAIN)
-    public String createItems() {
+    public String createItemsRedis() {
         int num = 1000;
-        redisDao.clearItems();
         long a = System.currentTimeMillis();
         Random rand = new Random();
         for (int x = 1; x <= num; x++) {
@@ -143,13 +167,59 @@ public class AuctionWS {
             String desc = "desc" + x;
             String price = "" + (rand.nextInt(1000) + 1);
 
-//            redisDao.insertItem(code, desc, price);
-            redisDao.insertItemsAsList(code, desc, price);
+            redisDao.insertItemsHash(code, desc, price);
+//            redisDao.insertItemsAsList(code, desc, price);
         }
         long b = System.currentTimeMillis();
-
         return "Time taken to inseted " + num + " items in Redis:" + (b - a);
+    }
 
+    @GET
+    @Path("/createUsersRedis")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String createUsersRedis() {
+        int num = 1000;
+
+        long a = System.currentTimeMillis();
+        Random rand = new Random();
+        for (int x = 1; x <= num; x++) {
+            String userName = "userName" + x;
+            String firstName = "firstName" + x;
+            String lastName = "desc" + x;
+            String email = userName + "@qu.edu.qa";
+            String contactNumber = "66107777";
+
+            redisDao.insertUsersHash(userName, firstName, lastName, email, contactNumber);
+        }
+        long b = System.currentTimeMillis();
+        return "Time taken to insert " + num + " User in Redis:" + (b - a);
+    }
+
+    @GET
+    @Path("/createUsersMySQL")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String createUsersMySQL() {
+        int num = 1000;
+
+        long a = System.currentTimeMillis();
+        Random rand = new Random();
+        for (int x = 1; x <= num; x++) {
+            String userName = "userName" + x;
+            String firstName = "firstName" + x;
+            String lastName = "desc" + x;
+            String email = userName + "@qu.edu.qa";
+            String contactNumber = "66107777";
+            Users user = new Users();
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setEmail(email);
+            user.setContactNumber(contactNumber);
+            user.setUserName(userName);
+            user.setId(null);
+            usersDao.create(user);
+        }
+        long b = System.currentTimeMillis();
+        return "Time taken to insert " + num + " User in MySQL:" + (b - a);
     }
 
     @GET
@@ -180,8 +250,8 @@ public class AuctionWS {
     @Produces(MediaType.APPLICATION_JSON)
     public String getAllItemRedis() {
         long a = System.currentTimeMillis();
-//        String itemsJson =  redisDao.getAllItemsHash();
-        String itemsJson = redisDao.getAllItemsAsList();
+        String itemsJson =  redisDao.getAllItemsHash();
+//        String itemsJson = redisDao.getAllItemsAsList();
         long b = System.currentTimeMillis();
         System.out.println("Time taken to retrieve all items from Redis:" + (b - a));
         return itemsJson;
@@ -208,6 +278,29 @@ public class AuctionWS {
         System.out.println("Time taken to Search in MySQL:" + (b - a));
         return items;
 
+    }
+
+    @GET
+    @Path("/getLBoardItems")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLBoardItems() {
+        Long a = System.currentTimeMillis();
+        String lboardItems = redisDao.getLBoardITems();
+        Long b = System.currentTimeMillis();
+        System.out.println("Time taken to Get LBoardItems in Redis:" + (b - a));
+        return lboardItems;
+
+    }
+
+    @GET
+    @Path("/getLBoardUsers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLBoardUsers() {
+        Long a = System.currentTimeMillis();
+        String lboardItems = redisDao.getLBoardUsers();
+        Long b = System.currentTimeMillis();
+        System.out.println("Time taken to Get getLBoardUsers in Redis:" + (b - a));
+        return lboardItems;
     }
 
     @GET

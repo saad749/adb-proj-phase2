@@ -16,7 +16,7 @@ public interface RedisDao {
 
     void bid(String userName, String itemCode, String bidValue);
 
-    void insertItem(String itemCode, String itenDesc, String price);
+    void insertItemsHash(String itemCode, String itenDesc, String price);
 
     void clearItems();
 
@@ -26,5 +26,8 @@ public interface RedisDao {
      void insertItemsAsList(String itemCode, String itenDesc, String price);
      String searchItems(String match);
      void deleteAllKeys();
+      String getLBoardITems();
+      String getLBoardUsers();
+      void insertUsersHash(String userName, String firstName, String lastName, String email, String contactNumber) ;
 
 }

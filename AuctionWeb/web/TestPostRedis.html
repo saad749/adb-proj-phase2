@@ -23,35 +23,65 @@ and open the template in the editor.
         </form>
         <br/><br/>
         <div>Pattern Search Redis:</div>
-         <form action="wss/ws/search" method="post">
+        <form action="wss/ws/search" method="post">
             <table>                
                 <tr> <td>Search Pattern</td>  <td><input type="text" name="pattern" /></td> </tr>
                 <tr><td colspan="2"> ex: *"itemCode33"*, *"itemCode3*, *33*</td></tr>
+                <tr><td colspan="2"><input type="submit" value="submit"/></td></tr>
             </table>
 
-            <input type="submit" value="submit"/>
+
         </form>
         <br/><br/>
         <div>Pattern Search MySQL: </div>
-         <form action="wss/ws/searchMySQL" method="post">
+        <form action="wss/ws/searchMySQL" method="post">
             <table>                           
                 <tr> <td>Item Code field:</td>  <td><input type="text" name="itemCode" /></td> </tr>
-                <tr><td colspan="2"> ex: </td></tr>
-            </table>
-
-            <input type="submit" value="submit"/>
+                <tr><td colspan="2" > ex: item% </td></tr>
+                <tr><td colspan="2"  > <input type="submit" value="submit"/> </td></tr>
+            </table>           
         </form>
-        
-    <ul>
-        <li><a href="wss/ws/getAllItemsRedis">Get All Item Redis</a> </li>
-        <li><a href="wss/ws/items">Get All Item MySQL</a> </li>
-        <li><a href="wss/ws/createItemsRedis">Insert 1000 Items Redis </a> </li>
-        <li><a href="wss/ws/createItemsMySQL">Insert 1000 Items MySQL</a> </li>
-        <li><a href="wss/ws/clearRedis">Delete All Redis Keys</a> </li>
         <br/>
-        <li><a href="wss/ws/simulateBids">Simulate 1000 Bids Redis </a> </li>
-    </ul>
-        
-        
+
+
+        <div style="float:left; border: 1px solid black;padding:10px"> 
+            
+            <ul>
+                <li><a href="wss/ws/getAllItemsRedis">Get All Item Redis</a> </li>
+                
+                <li><a href="wss/ws/createItemsRedis">Insert 1000 Items Redis </a> </li>
+                <li><a href="wss/ws/createUsersRedis">Insert 1000 Users Redis </a> </li>
+                
+                <li><a href="wss/ws/clearRedis">Delete All Redis Keys</a> </li>
+                <br/>
+                <li><a href="wss/ws/simulateBidsRedis">Simulate 1000 Bids Redis </a> </li>
+                
+
+                <li><a href="wss/ws/getLBoardItems">Item Leader Board </a> </li>
+                <li><a href="wss/ws/getLBoardUsers">User Leader Board </a> </li>
+
+            </ul>
+        </div>
+
+
+        <div style="float:left; border: 1px solid black; margin-left:50px;padding:10px">
+            <ul >
+                
+                <li><a href="wss/ws/items">Get All Item MySQL</a> </li>
+                
+                <li><a href="wss/ws/createItemsMySQL">Insert 1000 Items MySQL</a> </li>
+                <li><a href="wss/ws/createUsersMySQL">Insert 1000 User MySQL</a> </li>
+                
+                <br/>
+                
+                <li><a href="wss/ws/simulateBidsMySQL">Simulate 1000 Bids MySQL </a> </li>
+
+                
+                
+
+            </ul>
+        </div>
+
+
     </body>
 </html>
