@@ -6,6 +6,7 @@
 package edu.qu.auction.dao;
 
 import edu.qu.auction.domain.Bids;
+import java.util.List;
 
 /**
  *
@@ -14,4 +15,6 @@ import edu.qu.auction.domain.Bids;
 public interface BidsDao extends BaseDao<Bids>{
     
     public void bid( Bids bids);
+        public List<Bids> getTopRankUser();
+        public List<Bids> getTopRankItems();
 }

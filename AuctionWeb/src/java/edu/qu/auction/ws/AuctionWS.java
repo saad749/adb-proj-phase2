@@ -18,6 +18,10 @@ import java.util.Map;
 import java.util.Random;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -68,7 +72,7 @@ public class AuctionWS {
 
     @GET
     @Path("/bids")
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_JSON)
     public List<Bids> getBids() {
         return bidsDao.findAll();
     }
@@ -124,12 +128,12 @@ public class AuctionWS {
 
             String userName = "userName" + (rand.nextInt(10) + 1);
             String itemCode = "itemCode" + (rand.nextInt(10) + 1);
-            String bidValue = "" +  (rand.nextInt(1000) + 1);
+            String bidValue = "" + (rand.nextInt(1000) + 1);
 
             Users user = usersDao.findByUserName(userName);
             List<Items> items = itemsFacade.getItemsByCode(itemCode);
             Items item = items.get(0);
-            
+
             Bids bid = new Bids();
             bid.setItemId(item);
             bid.setUserId(user);
@@ -250,7 +254,7 @@ public class AuctionWS {
     @Produces(MediaType.APPLICATION_JSON)
     public String getAllItemRedis() {
         long a = System.currentTimeMillis();
-        String itemsJson =  redisDao.getAllItemsHash();
+        String itemsJson = redisDao.getAllItemsHash();
 //        String itemsJson = redisDao.getAllItemsAsList();
         long b = System.currentTimeMillis();
         System.out.println("Time taken to retrieve all items from Redis:" + (b - a));
@@ -281,9 +285,9 @@ public class AuctionWS {
     }
 
     @GET
-    @Path("/getLBoardItems")
+    @Path("/getLBoardItemsRedis")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getLBoardItems() {
+    public String getLBoardItemsRedis() {
         Long a = System.currentTimeMillis();
         String lboardItems = redisDao.getLBoardITems();
         Long b = System.currentTimeMillis();
@@ -293,14 +297,64 @@ public class AuctionWS {
     }
 
     @GET
-    @Path("/getLBoardUsers")
+    @Path("/getLBoardUsersRedis")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getLBoardUsers() {
+    public String getLBoardUsersRedis() {
         Long a = System.currentTimeMillis();
         String lboardItems = redisDao.getLBoardUsers();
         Long b = System.currentTimeMillis();
         System.out.println("Time taken to Get getLBoardUsers in Redis:" + (b - a));
         return lboardItems;
+    }
+
+    @GET
+    @Path("/getLBoardItemsMySQL")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLBoardItemsMySQL() {
+        Long a = System.currentTimeMillis();
+        List<Bids> topUsers = bidsDao.getTopRankItems();   
+        JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();
+        for(Object bb : topUsers){
+            Items item = (Items) ((Object[]) bb)[0];
+            long value = (long) ((Object[]) bb)[1];
+            JsonObjectBuilder elementBuilder = Json.createObjectBuilder();
+            elementBuilder.add("id",item.getId() );
+            elementBuilder.add("itemCode",item.getItemCode());
+            elementBuilder.add("price",item.getPrice());
+            elementBuilder.add("desc",item.getShortDesc());
+            elementBuilder.add("value",value);    
+            elementsBuilder.add(elementBuilder);
+        }
+        JsonArray obj = elementsBuilder.build(); 
+        Long b = System.currentTimeMillis();
+        System.out.println("Time taken to Get LBoardItems in MySQL :" + (b - a));        
+        return obj.toString();   
+    }
+
+    @GET
+    @Path("/getLBoardUsersMySQL")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLBoardUsersMySQL() {
+        Long a = System.currentTimeMillis();
+        List<Bids> topUsers = bidsDao.getTopRankUser();   
+        JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();
+        for(Object bb : topUsers){
+            Users user = (Users) ((Object[]) bb)[0];
+            long value = (long) ((Object[]) bb)[1];
+            JsonObjectBuilder elementBuilder = Json.createObjectBuilder();
+            elementBuilder.add("id",user.getId() );
+            elementBuilder.add("userName",user.getUserName());
+            elementBuilder.add("firstName",user.getFirstName() );
+            elementBuilder.add("lastName",user.getLastName() );
+            elementBuilder.add("email",user.getEmail() );
+            elementBuilder.add("contact",user.getContactNumber());
+            elementBuilder.add("value",value);    
+            elementsBuilder.add(elementBuilder);
+        }
+        JsonArray obj = elementsBuilder.build(); 
+        Long b = System.currentTimeMillis();
+        System.out.println("Time taken to Get LBoardUsers in MySQL :" + (b - a));        
+        return obj.toString();        
     }
 
     @GET

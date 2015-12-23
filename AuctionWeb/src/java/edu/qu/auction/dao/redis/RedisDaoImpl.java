@@ -204,7 +204,9 @@ public class RedisDaoImpl implements RedisDao {
         Jedis jedis = getJedisConnection();
         JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();        
         long a = System.currentTimeMillis();
-        Set<Tuple> tuples = jedis.zrevrangeWithScores("LBoradItems", 0, -1);
+        Set<Tuple> tuples = jedis.zrevrangeWithScores("LBoradItems", 0, 4);
+        long b = System.currentTimeMillis();
+         System.out.println("LBoradItems fetch:" + (b - a));
         for(Tuple t : tuples){
             double score = t.getScore();
             String elem = t.getElement();
@@ -213,8 +215,8 @@ public class RedisDaoImpl implements RedisDao {
             elementBuilder.add("score", score);
             elementsBuilder.add(elementBuilder);
         }
-        long b = System.currentTimeMillis();
-        System.out.println("LBoradItems fetch:" + (b - a));
+        
+       
         JsonArray obj = elementsBuilder.build();        
         return obj.toString();
     }
@@ -223,7 +225,9 @@ public class RedisDaoImpl implements RedisDao {
         Jedis jedis = getJedisConnection();
         JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();        
         long a = System.currentTimeMillis();
-        Set<Tuple> tuples = jedis.zrevrangeWithScores("LBoardUsers", 0, -1);
+        Set<Tuple> tuples = jedis.zrevrangeWithScores("LBoardUsers", 0, 4);
+         long b = System.currentTimeMillis();
+        System.out.println("LBoradUsers fetch:" + (b - a));
         for(Tuple t : tuples){
             double score = t.getScore();
             String elem = t.getElement();
@@ -232,8 +236,8 @@ public class RedisDaoImpl implements RedisDao {
             elementBuilder.add("score", score);
             elementsBuilder.add(elementBuilder);
         }
-        long b = System.currentTimeMillis();
-        System.out.println("LBoradUsers fetch:" + (b - a));
+       
+        
         JsonArray obj = elementsBuilder.build();        
         return obj.toString();
     }

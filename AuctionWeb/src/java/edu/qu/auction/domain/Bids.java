@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,7 +32,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Bids.findAll", query = "SELECT b FROM Bids b"),
     @NamedQuery(name = "Bids.findById", query = "SELECT b FROM Bids b WHERE b.id = :id"),
-    @NamedQuery(name = "Bids.findByBidValue", query = "SELECT b FROM Bids b WHERE b.bidValue = :bidValue")})
+    @NamedQuery(name = "Bids.findByBidValue", query = "SELECT b FROM Bids b WHERE b.bidValue = :bidValue"),
+    @NamedQuery(name = "Bids.GroupByItems", query = "SELECT b.itemId, COUNT(b.itemId) FROM Bids b Group By b.itemId Order by COUNT(b.itemId) desc"),
+    @NamedQuery(name = "Bids.GroupByUsers", query = "SELECT b.userId, COUNT(b.userId) FROM Bids b Group By b.userId Order by COUNT(b.userId) desc ")
+})
 public class Bids implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -48,10 +52,10 @@ public class Bids implements Serializable {
 //    @OneToMany(mappedBy = "currentBid")
 //    private Collection<Items> itemsCollection;
     @JoinColumn(name = "UserId", referencedColumnName = "Id")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     private Users userId;
     @JoinColumn(name = "ItemId", referencedColumnName = "Id")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     private Items itemId;
 
     public Bids() {
@@ -90,7 +94,7 @@ public class Bids implements Serializable {
 //    public void setItemsCollection(Collection<Items> itemsCollection) {
 //        this.itemsCollection = itemsCollection;
 //    }
-
+    
     public Users getUserId() {
         return userId;
     }
