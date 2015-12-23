@@ -21,5 +21,37 @@ and open the template in the editor.
 
             <input type="submit" value="submit"/>
         </form>
+        <br/><br/>
+        <div>Pattern Search Redis:</div>
+         <form action="wss/ws/search" method="post">
+            <table>                
+                <tr> <td>Search Pattern</td>  <td><input type="text" name="pattern" /></td> </tr>
+                <tr><td colspan="2"> ex: *"itemCode33"*, *"itemCode3*, *33*</td></tr>
+            </table>
+
+            <input type="submit" value="submit"/>
+        </form>
+        <br/><br/>
+        <div>Pattern Search MySQL: </div>
+         <form action="wss/ws/searchMySQL" method="post">
+            <table>                           
+                <tr> <td>Item Code field:</td>  <td><input type="text" name="itemCode" /></td> </tr>
+                <tr><td colspan="2"> ex: </td></tr>
+            </table>
+
+            <input type="submit" value="submit"/>
+        </form>
+        
+    <ul>
+        <li><a href="wss/ws/getAllItemsRedis">Get All Item Redis</a> </li>
+        <li><a href="wss/ws/items">Get All Item MySQL</a> </li>
+        <li><a href="wss/ws/createItemsRedis">Insert 1000 Items Redis </a> </li>
+        <li><a href="wss/ws/createItemsMySQL">Insert 1000 Items MySQL</a> </li>
+        <li><a href="wss/ws/clearRedis">Delete All Redis Keys</a> </li>
+        <br/>
+        <li><a href="wss/ws/simulateBids">Simulate 1000 Bids Redis </a> </li>
+    </ul>
+        
+        
     </body>
 </html>
