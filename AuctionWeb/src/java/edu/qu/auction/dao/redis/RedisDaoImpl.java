@@ -161,8 +161,9 @@ public class RedisDaoImpl implements RedisDao {
         for(String val : items.values()){
             builder.append(val).append(",");
         }
+        builder.replace(builder.lastIndexOf(","), builder.length(), "");
         builder.append("]");
-         String res = builder.toString();
+        String res = builder.toString();
 
         return res;
     }
@@ -211,7 +212,7 @@ public class RedisDaoImpl implements RedisDao {
             double score = t.getScore();
             String elem = t.getElement();
             JsonObjectBuilder elementBuilder = Json.createObjectBuilder();
-            elementBuilder.add("itemCode", elem);
+            elementBuilder.add("code", elem);
             elementBuilder.add("score", score);
             elementsBuilder.add(elementBuilder);
         }

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Grid Test</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!--themes-->
+        <link href="resources/css1/jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+        <link href="resources/css1/primeui-2.2-min.css" rel="stylesheet" type="text/css"/>
+        <link href="resources/css1/theme.css" rel="stylesheet" type="text/css"/>
+        <!--custom css-->
+        <link href="resources/css1/app.css" rel="stylesheet" type="text/css"/>
+        <!--javascript libs-->
+        <script src="resources/lib/jquery.js" type="text/javascript"></script>
+        <script src="resources/lib/jquery-ui.js" type="text/javascript"></script>
+        <script src="resources/lib/primeui-2.2-min.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <div class="app-content">
+            <button id="start" type="button" style="clear: both;">Start</button>
+            <div id="app-table-items" style="float: left;width:20%"></div>
+            <div id="app-table" style="float: left;width:50%"></div>
+            <div id="app-table-users" style="float: left;width:20%"></div>
+        </div>
+
+
+
+        <script>
+            $(function () {
+//                onload method starts
+
+                var interval = 300;
+                $('#start').puibutton({
+                    click: function (event) {
+                        setInterval(getData, interval);
+                    }
+                });
+
+
+
+                var getData = function () {
+                    bid();
+                    getDataItems();
+                    getDataLBoardItems();
+                    getDataLBoardUsers();
+                };
+
+                 var bid = function () {
+                    console.log('time to run: ' + ++count);
+                    $.ajax({
+                        type: "GET",
+//                        url: 'rest/data/stuff.json',
+                        url: '/AuctionWeb/wss/ws/simulateBidsRedis',
+                        dataType: "text",
+                        context: this,
+                        success: function (response) {
+                            // callback.call(this, response);
+                          console.log(response);
+                        }
+                    });
+                };
+                var count = 0;
+                var getDataItems = function () {
+                    console.log('time to run: ' + ++count);
+                    $.ajax({
+                        type: "GET",
+//                        url: 'rest/data/stuff.json',
+                        url: '/AuctionWeb/wss/ws/getAllItemsRedis',
+                        dataType: "json",
+                        context: this,
+                        success: function (response) {
+                            // callback.call(this, response);
+                            var jsonArray = response;
+                            refreshGridItems(jsonArray);
+                        }
+                    });
+                };
+                var getDataLBoardItems = function () {
+//                    console.log('time to run: ' + ++count);
+                    $.ajax({
+                        type: "GET",
+//                        url: 'rest/data/stuff.json',
+                        url: '/AuctionWeb/wss/ws/getLBoardItemsRedis',
+                        dataType: "json",
+                        context: this,
+                        success: function (response) {
+                            // callback.call(this, response);
+                            var jsonArray = response;
+                            refreshGridLBoardItems(jsonArray);
+                        }
+                    });
+                };
+
+                var getDataLBoardUsers = function () {
+//                    console.log('time to run: ' + ++count);
+                    $.ajax({
+                        type: "GET",
+//                        url: 'rest/data/stuff.json',
+                        url: '/AuctionWeb/wss/ws/getLBoardUsersRedis',
+                        dataType: "json",
+                        context: this,
+                        success: function (response) {
+                            // callback.call(this, response);
+                            var jsonArray = response;
+                            refreshGridLBoardUsers(jsonArray);
+                        }
+                    });
+                };
+
+
+                /*run to refresh the grid with the new data*/
+                var refreshGridItems = function (_jsonArray) {
+//                    console.log(_jsonArray);
+                    $('#app-table').puidatatable({
+                        caption: 'Local Datasource',
+                        paginator: {
+                            rows: 10
+                        },
+                        columns: [
+                            {field: 'code', headerText: 'Item Code'},
+                            {field: 'desc', headerText: 'Description'},
+                            {field: 'price', headerText: 'Price'}
+                        ],
+                        datasource: _jsonArray
+                    });
+                };
+                /*run to refresh the grid with the new data*/
+                var refreshGridLBoardItems = function (_jsonArray) {
+//                    console.log(_jsonArray);
+                    $('#app-table-items').puidatatable({
+                        caption: 'Local Datasource',
+                        paginator: {
+                            rows: 10
+                        },
+                        columns: [
+                            {field: 'code', headerText: 'Item Code'},
+                            {field: 'score', headerText: 'score'}
+                        ],
+                        datasource: _jsonArray
+                    });
+                };
+
+                /*run to refresh the grid with the new data*/
+                var refreshGridLBoardUsers = function (_jsonArray) {
+//                    console.log(_jsonArray);
+                    $('#app-table-users').puidatatable({
+                        caption: 'Local Datasource',
+                        paginator: {
+                            rows: 10
+                        },
+                        columns: [
+                            {field: 'unserName', headerText: 'User'},
+                            {field: 'score', headerText: 'score'}
+                        ],
+                        datasource: _jsonArray
+                    });
+                };
+
+
+            });
+
+
+
+
+        </script>
+
+    </body>
+</html>

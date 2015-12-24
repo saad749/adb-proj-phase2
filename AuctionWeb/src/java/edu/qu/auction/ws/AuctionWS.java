@@ -102,7 +102,7 @@ public class AuctionWS {
     @Path("/simulateBidsRedis")
     @Produces(MediaType.TEXT_PLAIN)
     public String simulateBidsRedis() {
-        int num = 1000;
+        int num = 10;
         long a = System.currentTimeMillis();
         Random rand = new Random();
         for (int x = 1; x <= num; x++) {
