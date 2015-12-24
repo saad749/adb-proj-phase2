@@ -14,4 +14,5 @@ import java.util.List;
  */
 public interface ItemsDao  extends BaseDao<Items>{
     public List<Items> getItemsByCode(String itemCode);
+    public List<Items> getAllItemsOrdered();
 }

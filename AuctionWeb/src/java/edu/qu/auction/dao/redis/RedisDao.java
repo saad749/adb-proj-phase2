@@ -29,5 +29,6 @@ public interface RedisDao {
       String getLBoardITems();
       String getLBoardUsers();
       void insertUsersHash(String userName, String firstName, String lastName, String email, String contactNumber) ;
+       String getAllItemsSortedHash();
 
 }

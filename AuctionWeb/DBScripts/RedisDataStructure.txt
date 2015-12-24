@@ -1,0 +1,76 @@
+ItemsHash (Hash)
+-------------------
+	ItemCode -> JSON details
+Ex: hgetall ItemsHash
+	itemCode900 -> {"code":"itemCode900","desc":"desc900","price":"974"}
+	itemCode544 -> {"code":"itemCode544","desc":"desc544","price":"763"}
+	
+UsersHash (Hash)
+---------------------
+	Username - > JSON details
+Ex: hgetall UsersHash
+	userName455 -> {"firstName":"firstName455","lastName":"desc455","email":"userName455@qu.edu.qa","contactNumber":"66107777"}
+	userName63 -> {"firstName":"firstName63","lastName":"desc63","email":"userName63@qu.edu.qa","contactNumber":"66107777"}
+	
+BidsHash (Hash)
+-------------------
+Ex: hgetall BidsHash
+6 -> { "id ":6, "UserId ": "userName9 ", "ItemId ": "itemCode8 ", "BidValue ": "968 "}
+5 -> { "id ":5, "UserId ": "userName10 ", "ItemId ": "itemCode9 ", "BidValue ": "683 "}
+
+CurrentItemBid (Hash)
+-------------------------
+	ItemCode: -> BidId
+Ex: hgetall CurrentItemBid 
+	userName8 -> 6
+	userName9 -> 5
+
+
+LBoardUsers (Sorted Sets)
+----------------------------
+  userName : score ( number of bids)
+Ex: zrevrange  LBoardUsers  0 -1 withscores	
+ userName9 : 2 
+ userName7 : 2 
+ userName5 : 2 
+ userName6 : 1 
+ userName3 : 1 
+ userName10: 1 
+ userName1 : 1 
+
+LBoradItems (Sorted Set)
+-------------------------------
+ItemCode : score ( number of bids)
+
+Ex: zrevrange LBoradItems  0 -1 withscores
+ itemCode7  :  4 
+ itemCode9  :  1 
+ itemCode8  :  1 
+ itemCode5  :  1 
+ itemCode4  :  1 
+ itemCode10 :  1 
+ itemCode1  :  1 
+
+
+SortBidsValue (Sorted Set)
+-----------------------------------
+BidId : score (current bidvalue)
+
+Ex: zrevrange SortBidsValue  0 -1 withscores
+ 6  :  968 
+ 2  :  950 
+ 4  :  867 
+ 5  :  683 
+ 8  :  680 
+ 7  :  623 
+ 10 :  392 
+ 3  :  342 
+ 9  :  336 
+ 1  :  312 
+
+
+BidsSeq (String)
+----------------
+Ex: get BidsSeq 
+10
+

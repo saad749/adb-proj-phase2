@@ -35,8 +35,6 @@ and open the template in the editor.
 
         <script>
             $(function () {
-//                onload method starts
-
                 var interval = 300;
                 var intervalId;
                 $('#start').puibutton({
@@ -45,14 +43,11 @@ and open the template in the editor.
                     }
                 });
 
-
                 $('#stop').puibutton({
                     click: function (event) {
                         clearInterval(intervalId);
                     }
                 });
-
-
 
                 var getData = function () {
                     bid();
@@ -66,11 +61,10 @@ and open the template in the editor.
                     $.ajax({
                         type: "GET",
 //                        url: 'rest/data/stuff.json',
-                        url: '/AuctionWeb/wss/ws/simulateBidsRedis',
+                        url: '/AuctionWeb/wss/ws/simulateBidsMySQL',
                         dataType: "text",
                         context: this,
-                        success: function (response) {
-                            // callback.call(this, response);
+                        success: function (response) {                            
                             console.log(response);
                         }
                     });
@@ -81,7 +75,7 @@ and open the template in the editor.
                     $.ajax({
                         type: "GET",
 //                        url: 'rest/data/stuff.json',
-                        url: '/AuctionWeb/wss/ws/getAllItemsRedis',
+                        url: '/AuctionWeb/wss/ws/items',
                         dataType: "json",
                         context: this,
                         success: function (response) {
@@ -96,7 +90,7 @@ and open the template in the editor.
                     $.ajax({
                         type: "GET",
 //                        url: 'rest/data/stuff.json',
-                        url: '/AuctionWeb/wss/ws/getLBoardItemsRedis',
+                        url: '/AuctionWeb/wss/ws/getLBoardItemsMySQL',
                         dataType: "json",
                         context: this,
                         success: function (response) {
@@ -112,7 +106,7 @@ and open the template in the editor.
                     $.ajax({
                         type: "GET",
 //                        url: 'rest/data/stuff.json',
-                        url: '/AuctionWeb/wss/ws/getLBoardUsersRedis',
+                        url: '/AuctionWeb/wss/ws/getLBoardUsersMySQL',
                         dataType: "json",
                         context: this,
                         success: function (response) {
@@ -133,10 +127,10 @@ and open the template in the editor.
                             rows: 10
                         },
                         columns: [
-                            {field: 'code', headerText: 'Item Code'},
-                            {field: 'desc', headerText: 'Description'},
+                            {field: 'itemCode', headerText: 'Item Code'},
+                            {field: 'shortDesc', headerText: 'Description'},
                             {field: 'price', headerText: 'Price'},
-                            {field: 'currBid', headerText: 'Current Bid'}
+                            {field: 'currentValue', headerText: 'Current Bid'}
 
                         ],
                         datasource: _jsonArray
@@ -151,8 +145,8 @@ and open the template in the editor.
                             rows: 10
                         },
                         columns: [
-                            {field: 'code', headerText: 'Item Code'},
-                            {field: 'score', headerText: '# Bids'}
+                            {field: 'itemCode', headerText: 'Item Code'},
+                            {field: 'value', headerText: '# Bids'}
                         ],
                         datasource: _jsonArray
                     });
@@ -162,13 +156,13 @@ and open the template in the editor.
                 var refreshGridLBoardUsers = function (_jsonArray) {
 //                    console.log(_jsonArray);
                     $('#app-table-users').puidatatable({
-                        caption: 'Top 5 Users',
+                         caption: 'Top 5 Users',
                         paginator: {
                             rows: 10
                         },
                         columns: [
-                            {field: 'unserName', headerText: 'User'},
-                            {field: 'score', headerText: '# Bids'}
+                            {field: 'userName', headerText: 'User'},
+                            {field: 'value', headerText: '# Bids'}
                         ],
                         datasource: _jsonArray
                     });

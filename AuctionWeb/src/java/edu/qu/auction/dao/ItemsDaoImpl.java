@@ -31,4 +31,11 @@ public class ItemsDaoImpl extends BaseDaoImpl<Items> implements ItemsDao{
        
     } 
     
+    public List<Items> getAllItemsOrdered(){
+        Query query = getEntityManager().createNamedQuery("Items.findAll");        
+        List<Items> list = query.getResultList();       
+       return list;
+       
+    } 
+    
 }

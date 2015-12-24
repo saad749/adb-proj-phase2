@@ -57,7 +57,7 @@ public class AuctionWS {
     @Produces(MediaType.APPLICATION_JSON)
     public List<Items> getITems() {
         long a = System.currentTimeMillis();
-        List<Items> items = itemsFacade.findAll();
+        List<Items> items = itemsFacade.getAllItemsOrdered();
         long b = System.currentTimeMillis();
         System.out.println("Time taken to retrieve all items in MySQL:" + (b - a));
         return items;
@@ -121,7 +121,7 @@ public class AuctionWS {
     @Path("/simulateBidsMySQL")
     @Produces(MediaType.TEXT_PLAIN)
     public String simulateBidsMySQL() {
-        int num = 1000;
+        int num = 10;
         long a = System.currentTimeMillis();
         Random rand = new Random();
         for (int x = 1; x <= num; x++) {
@@ -254,7 +254,8 @@ public class AuctionWS {
     @Produces(MediaType.APPLICATION_JSON)
     public String getAllItemRedis() {
         long a = System.currentTimeMillis();
-        String itemsJson = redisDao.getAllItemsHash();
+        String itemsJson = redisDao.getAllItemsSortedHash();
+//        String itemsJson = redisDao.getAllItemsHash();
 //        String itemsJson = redisDao.getAllItemsAsList();
         long b = System.currentTimeMillis();
         System.out.println("Time taken to retrieve all items from Redis:" + (b - a));

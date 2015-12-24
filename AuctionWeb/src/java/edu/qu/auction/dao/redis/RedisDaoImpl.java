@@ -6,7 +6,6 @@
 package edu.qu.auction.dao.redis;
 
 import java.io.StringWriter;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +15,7 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
 import javax.json.JsonWriter;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ScanParams;
@@ -39,7 +39,7 @@ public class RedisDaoImpl implements RedisDao {
         Jedis jedis = getJedisConnection();
 
         //Insert Bid
-        //sadd BidsList
+        //sadd BidsHash
         Long BidId = jedis.incr("BidsSeq");
         JsonObjectBuilder itemBuilder = Json.createObjectBuilder()
                 .add("id", BidId)
@@ -48,12 +48,15 @@ public class RedisDaoImpl implements RedisDao {
                 .add("BidValue", bidValue + "");
         JsonObject obj = itemBuilder.build();
 
-        jedis.sadd("BidsList", obj.toString());
+        jedis.hset("BidsHash", BidId + "", obj.toString());
 
         //Insert bid
         //HSET key field value
         String key = "CurrentItemBid";
         jedis.hset(key, itemCode, BidId + "");
+
+        String sortedBids = "SortBidsValue";
+        jedis.zadd(sortedBids, new Double(bidValue), itemCode);
 
         // Leaderboard Items
         //ZINCRBY key increment member
@@ -70,25 +73,29 @@ public class RedisDaoImpl implements RedisDao {
     public void insertItemsHash(String itemCode, String itenDesc, String price) {
         Jedis jedis = getJedisConnection();
         String ItemsKey = "ItemsHash";
-        JsonObjectBuilder itemBuilder = Json.createObjectBuilder()                
+        JsonObjectBuilder itemBuilder = Json.createObjectBuilder()
                 .add("code", itemCode)
                 .add("desc", itenDesc)
                 .add("price", price);
         JsonObject obj = itemBuilder.build();
 
         jedis.hset(ItemsKey, itemCode, obj.toString());
+
+        String sortedBids = "SortBidsValue";
+        jedis.zadd(sortedBids, 0, itemCode);
+
     }
-    
-     public void insertUsersHash(String userName, String firstName, String lastName, String email, String contactNumber) {
+
+    public void insertUsersHash(String userName, String firstName, String lastName, String email, String contactNumber) {
         Jedis jedis = getJedisConnection();
-        
+
         String userHashKey = "UsersHash";
-        
-        JsonObjectBuilder itemBuilder = Json.createObjectBuilder()                
-        .add("firstName", firstName)
-        .add("lastName", lastName)
-        .add("email", email)
-        .add("contactNumber", contactNumber);
+
+        JsonObjectBuilder itemBuilder = Json.createObjectBuilder()
+                .add("firstName", firstName)
+                .add("lastName", lastName)
+                .add("email", email)
+                .add("contactNumber", contactNumber);
         JsonObject obj = itemBuilder.build();
         jedis.hset(userHashKey, userName, obj.toString());
     }
@@ -152,13 +159,17 @@ public class RedisDaoImpl implements RedisDao {
 //        strw.write(jsonStr);
 //        return strw.toString();
 //    }
-
-    public String getAllItemsHash(){
+    public String getAllItemsHash() {
         Jedis jedis = getJedisConnection();
-        Map<String,String> items = jedis.hgetAll("ItemsHash");
+        Map<String, String> items = jedis.hgetAll("ItemsHash");
+        JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();
         StringBuilder builder = new StringBuilder();
         builder.append("[");
-        for(String val : items.values()){
+        for (String key : items.keySet()) {
+            double currenValue = jedis.zscore("SortBidsValue", key);
+            JsonObjectBuilder elementBuilder = Json.createObjectBuilder();
+            String val = items.get(key);
+            elementsBuilder.add(val);
             builder.append(val).append(",");
         }
         builder.replace(builder.lastIndexOf(","), builder.length(), "");
@@ -167,7 +178,26 @@ public class RedisDaoImpl implements RedisDao {
 
         return res;
     }
-    
+
+    public String getAllItemsSortedHash() {
+        Jedis jedis = getJedisConnection();        
+        StringBuilder strBuilder = new StringBuilder();
+          strBuilder.append("[");
+        Set<Tuple> tuples = jedis.zrevrangeWithScores("SortBidsValue", 0, -1);
+        for (Tuple t : tuples) {
+            double score = t.getScore();
+            String elem = t.getElement();
+            String itemDetails = jedis.hget("ItemsHash", elem);
+            strBuilder.append(itemDetails);
+            String currBidJson = ",\"currBid\":\""+score+"\"},";
+            strBuilder.replace(strBuilder.lastIndexOf("}"), strBuilder.length(), currBidJson);
+        }
+          strBuilder.replace(strBuilder.lastIndexOf(","), strBuilder.length(), "");
+         strBuilder.append("]");
+        return strBuilder.toString();
+        
+    }
+
     public String getAllItemsAsList() {
         Jedis jedis = getJedisConnection();
         Set<String> items = jedis.smembers("ItemsList");
@@ -187,28 +217,28 @@ public class RedisDaoImpl implements RedisDao {
         StringBuilder builder = new StringBuilder();
         ScanParams params = new ScanParams();
         params.match(match);
-         ScanResult<Map.Entry<String,String>> results =  jedis.hscan("ItemsHash", "0", params);
+        ScanResult<Map.Entry<String, String>> results = jedis.hscan("ItemsHash", "0", params);
 //        ScanResult<String> results = jedis.sscan("ItemsList", "0", params);
-        
+
         String cur = results.getStringCursor();
         while (!cur.equals("0")) {
             results = jedis.hscan("ItemsHash", cur, params);
             cur = results.getStringCursor();
-            for (Map.Entry<String,String> str : results.getResult()) {
+            for (Map.Entry<String, String> str : results.getResult()) {
                 builder.append(str.getValue()).append(",");
             }
         }
         return "[" + builder.toString() + "]";
     }
-    
-    public String getLBoardITems(){
+
+    public String getLBoardITems() {
         Jedis jedis = getJedisConnection();
-        JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();        
+        JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();
         long a = System.currentTimeMillis();
         Set<Tuple> tuples = jedis.zrevrangeWithScores("LBoradItems", 0, 4);
         long b = System.currentTimeMillis();
-         System.out.println("LBoradItems fetch:" + (b - a));
-        for(Tuple t : tuples){
+        System.out.println("LBoradItems fetch:" + (b - a));
+        for (Tuple t : tuples) {
             double score = t.getScore();
             String elem = t.getElement();
             JsonObjectBuilder elementBuilder = Json.createObjectBuilder();
@@ -216,20 +246,19 @@ public class RedisDaoImpl implements RedisDao {
             elementBuilder.add("score", score);
             elementsBuilder.add(elementBuilder);
         }
-        
-       
-        JsonArray obj = elementsBuilder.build();        
+
+        JsonArray obj = elementsBuilder.build();
         return obj.toString();
     }
-    
-        public String getLBoardUsers(){
+
+    public String getLBoardUsers() {
         Jedis jedis = getJedisConnection();
-        JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();        
+        JsonArrayBuilder elementsBuilder = Json.createArrayBuilder();
         long a = System.currentTimeMillis();
         Set<Tuple> tuples = jedis.zrevrangeWithScores("LBoardUsers", 0, 4);
-         long b = System.currentTimeMillis();
+        long b = System.currentTimeMillis();
         System.out.println("LBoradUsers fetch:" + (b - a));
-        for(Tuple t : tuples){
+        for (Tuple t : tuples) {
             double score = t.getScore();
             String elem = t.getElement();
             JsonObjectBuilder elementBuilder = Json.createObjectBuilder();
@@ -237,10 +266,9 @@ public class RedisDaoImpl implements RedisDao {
             elementBuilder.add("score", score);
             elementsBuilder.add(elementBuilder);
         }
-       
-        
-        JsonArray obj = elementsBuilder.build();        
+
+        JsonArray obj = elementsBuilder.build();
         return obj.toString();
     }
-    
+
 }

@@ -20,6 +20,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -33,7 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "items")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Items.findAll", query = "SELECT i FROM Items i"),
+    @NamedQuery(name = "Items.findAll", query = "SELECT i FROM Items i order by i.currentBid.bidValue desc"),
     @NamedQuery(name = "Items.findById", query = "SELECT i FROM Items i WHERE i.id = :id"),
     @NamedQuery(name = "Items.findByItemCode", query = "SELECT i FROM Items i WHERE i.itemCode like :itemCode"),
     @NamedQuery(name = "Items.findByShortDesc", query = "SELECT i FROM Items i WHERE i.shortDesc = :shortDesc"),
@@ -61,6 +62,9 @@ public class Items implements Serializable {
     private Bids currentBid;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "itemId")
     private Collection<Bids> bidsCollection;
+    
+    @Transient
+    private Double currentValue; 
 
     public Items() {
     }
@@ -117,6 +121,19 @@ public class Items implements Serializable {
     public void setBidsCollection(Collection<Bids> bidsCollection) {
         this.bidsCollection = bidsCollection;
     }
+
+    public Double getCurrentValue() {
+        if(currentBid != null )
+            return currentBid.getBidValue();
+        return null;
+    }
+
+    public void setCurrentValue(Double currentValue) {
+        this.currentValue = currentValue;
+    }
+    
+    
+    
 
     @Override
     public int hashCode() {
